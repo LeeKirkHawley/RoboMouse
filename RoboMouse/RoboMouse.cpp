@@ -8,6 +8,7 @@
 #include <windowsx.h>
 #include <sstream>
 #include <fstream>
+#include <string>
 #include "resource.h"
 #include "RoboMouseEvent.h"
 
@@ -32,6 +33,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 void                SetHook();
 void                ReleaseHook();
 void                WriteEvents();
+void                ReplayFile();
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -232,7 +234,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
                 break;
             case ID_FILE_REPLAY:
-
+                ReplayFile();
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -292,7 +294,6 @@ void ReleaseHook()
 
 void WriteEvents() 
 {
-
     wofstream file1;
     file1.open("c:\\\\temp\\RoboMouseEvents.txt");
 
@@ -306,6 +307,27 @@ void WriteEvents()
 
         file1 << *i;
         file1 << '\n';
+    }
+
+    file1.close();
+}
+
+void ReplayFile()
+{
+    wifstream file1;
+    
+    file1.open("c:\\\\temp\\RoboMouseEvents.txt");
+    if (!file1.is_open())
+    {
+        throw new exception("Couldn't open file.");
+    }
+
+    vecEvents.clear();
+
+    std::wstring line;
+    while (std::getline(file1, line))
+    {
+        vecEvents.push_back(line);
     }
 
     file1.close();
