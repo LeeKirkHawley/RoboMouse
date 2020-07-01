@@ -24,6 +24,7 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HHOOK mouseHook;
 bool hookActive = false;
 std::vector<wstring> vecEvents;
+const wchar_t* fileName = L"c:\\\\temp\\RoboMouseEvents.txt";
 
 
 // Forward declarations of functions included in this code module:
@@ -35,6 +36,7 @@ void                SetHook();
 void                ReleaseHook();
 void                WriteEvents();
 void                ReplayFile();
+bool                DoesFileExist(LPWSTR lpszFilename);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -295,8 +297,11 @@ void ReleaseHook()
 
 void WriteEvents() 
 {
+    if (DoesFileExist((LPWSTR)fileName) == true)
+        DeleteFile(L"c:\\\\temp\\RoboMouseEvents.txt");
+
     wofstream file1;
-    file1.open("c:\\\\temp\\RoboMouseEvents.txt", std::ofstream::out | std::ofstream::trunc);
+    file1.open("c:\\\\temp\\RoboMouseEvents.txt");
 
     if (!file1.is_open())
     {
@@ -338,8 +343,41 @@ void ReplayFile()
             SetCursorPos(stoi(splits[1]), stoi(splits[2]));
             Sleep(10);
         }
+        else if (splits[0] == L"LeftButtonDown") {
+            INPUT Inputs[1] = { 0 };
+
+            Inputs[0].type = INPUT_MOUSE;
+            Inputs[0].mi.dx = stoi(splits[1]); // desired X coordinate
+            Inputs[0].mi.dy = stoi(splits[2]); // desired Y coordinate
+            Inputs[0].mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN;
+
+            SendInput(1, Inputs, sizeof(INPUT));
+        }
+        else if (splits[0] == L"LeftButtonUp") {
+            INPUT Inputs[1] = { 0 };
+
+            Inputs[0].type = INPUT_MOUSE;
+            Inputs[0].mi.dx = stoi(splits[1]); // desired X coordinate
+            Inputs[0].mi.dy = stoi(splits[2]); // desired Y coordinate
+            Inputs[0].mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTUP;
+
+            SendInput(1, Inputs, sizeof(INPUT));
+        }
     }
 
 
     file1.close();
+}
+
+bool DoesFileExist(LPWSTR lpszFilename)
+{
+    DWORD attr = GetFileAttributes(lpszFilename);
+
+    //return (attr != INVALID_FILE_ATTRIBUTES)
+    //    && (GetLastError() == ERROR_FILE_NOT_FOUND));
+
+    if (attr == INVALID_FILE_ATTRIBUTES)
+        return false;
+    else
+        return true;
 }
