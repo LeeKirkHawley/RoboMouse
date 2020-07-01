@@ -27,6 +27,9 @@
     <ClInclude Include="RoboMouse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RoboMouseEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RoboMouse.cpp">

@@ -3,6 +3,15 @@
 
 #include "framework.h"
 #include "RoboMouse.h"
+#include <iostream>
+#include <vector>
+#include <windowsx.h>
+#include <sstream>
+#include <fstream>
+#include "resource.h"
+#include "RoboMouseEvent.h"
+
+using namespace std;
 
 #define MAX_LOADSTRING 100
 
@@ -10,12 +19,17 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+HHOOK mouseHook;
+bool hookActive = false;
+std::vector<wstring> vecEvents;
+
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+void                SetHook();
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -39,7 +53,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_ROBOMOUSE));
-
+    
     MSG msg;
 
     // Main message loop:
@@ -98,7 +112,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Store instance handle in our global variable
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+      300, 200, 300, 200, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -109,6 +123,115 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    UpdateWindow(hWnd);
 
    return TRUE;
+}
+
+
+LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    if (nCode >= 0)
+    {
+        switch (wParam)
+        {
+        case WM_LBUTTONDOWN: 
+        {
+            if (hookActive == true) {
+                POINT cursorPoint;
+                GetCursorPos(&cursorPoint);
+
+                wstring Event = L"";
+                Event.assign(L"LeftButtonDown");
+                Event.append(L",");
+                Event.append(to_wstring(cursorPoint.x));
+                Event.append(L",");
+                Event.append(to_wstring(cursorPoint.y));
+
+                vecEvents.push_back(Event);
+            }
+
+            // ACTIVE WINDOW
+            //HWND clickedWindow = WindowFromPoint(cursorPoint);
+            //wchar_t wnd_title[256];
+            //GetWindowText(clickedWindow, wnd_title, sizeof(wnd_title));
+            //wstringstream windowInfo;
+            //windowInfo << L"Window: " << clickedWindow << " " << wnd_title << L"\n";
+            //OutputDebugString(windowInfo.str().c_str());
+
+            
+        }
+        break;
+
+        case WM_LBUTTONUP:
+        {
+            POINT cursorPoint;
+            GetCursorPos(&cursorPoint);
+
+            wstring Event = L"";
+            Event.assign(L"LeftButtonUp");
+            Event.append(L",");
+            Event.append(to_wstring(cursorPoint.x));
+            Event.append(L",");
+            Event.append(to_wstring(cursorPoint.y));
+
+            vecEvents.push_back(Event);
+        }
+        break;
+
+        case WM_MOUSEMOVE: 
+        {
+            POINT cursorPoint;
+            GetCursorPos(&cursorPoint);
+
+            wstring Event = L"";
+            Event.assign(L"MouseMove");
+            Event.append(L",");
+            Event.append(to_wstring(cursorPoint.x));
+            Event.append(L",");
+            Event.append(to_wstring(cursorPoint.y));
+
+            vecEvents.push_back(Event);
+        }
+
+        default:
+            //cout << "Some other mouse event" << endl;
+            //OutputDebugString(L"Some other mouse event\n");
+            break;
+        }
+    }
+    return CallNextHookEx(mouseHook, nCode, wParam, lParam);
+}
+
+void SetHook()
+{
+    if (!(mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookCallback, NULL, 0)))
+    //if (!(mouseHook = SetWindowsHookEx(WH_MOUSE, MouseHookCallback, NULL, 0)))
+    {
+        cout << "Failed to install mouse hook!" << endl;
+    }
+}
+
+void ReleaseHook()
+{
+    UnhookWindowsHookEx(mouseHook);
+}
+
+void WriteEvents() {
+
+    wofstream file1;
+    file1.open("c:\\\\temp\\RoboMouseEvents.txt");
+
+    if (!file1.is_open())
+    {
+        throw new exception("Couldn't open file.");
+    }
+
+    for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
+        char str[80];
+
+        file1 << *i;
+        file1 << '\n';
+    }
+
+    file1.close();
 }
 
 //
@@ -123,6 +246,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+ 
     switch (message)
     {
     case WM_COMMAND:
@@ -136,6 +260,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
+                break;
+            case ID_GO:
+                if (hookActive == false) {
+                    SetHook();
+                    hookActive = true;
+                }
+                else {
+                    ReleaseHook();
+                    hookActive = false;
+                    WriteEvents();
+                }
+                break;
+            case ID_FILE_REPLAY:
+
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -178,3 +316,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return (INT_PTR)FALSE;
 }
+
