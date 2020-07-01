@@ -11,6 +11,7 @@
 #include <string>
 #include "resource.h"
 #include "RoboMouseEvent.h"
+#include "..\KLib\KLib.h"
 
 using namespace std;
 
@@ -295,7 +296,7 @@ void ReleaseHook()
 void WriteEvents() 
 {
     wofstream file1;
-    file1.open("c:\\\\temp\\RoboMouseEvents.txt");
+    file1.open("c:\\\\temp\\RoboMouseEvents.txt", std::ofstream::out | std::ofstream::trunc);
 
     if (!file1.is_open())
     {
@@ -303,7 +304,6 @@ void WriteEvents()
     }
 
     for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
-        char str[80];
 
         file1 << *i;
         file1 << '\n';
@@ -329,6 +329,17 @@ void ReplayFile()
     {
         vecEvents.push_back(line);
     }
+
+    for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
+
+        vector<wstring> splits = KLib::Split(*i);
+
+        if (splits[0] == L"MouseMove") {
+            SetCursorPos(stoi(splits[1]), stoi(splits[2]));
+            Sleep(10);
+        }
+    }
+
 
     file1.close();
 }
