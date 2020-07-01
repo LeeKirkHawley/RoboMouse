@@ -30,6 +30,8 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 void                SetHook();
+void                ReleaseHook();
+void                WriteEvents();
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -200,50 +202,7 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
     return CallNextHookEx(mouseHook, nCode, wParam, lParam);
 }
 
-void SetHook()
-{
-    if (!(mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookCallback, NULL, 0)))
-    //if (!(mouseHook = SetWindowsHookEx(WH_MOUSE, MouseHookCallback, NULL, 0)))
-    {
-        cout << "Failed to install mouse hook!" << endl;
-    }
-}
 
-void ReleaseHook()
-{
-    UnhookWindowsHookEx(mouseHook);
-}
-
-void WriteEvents() {
-
-    wofstream file1;
-    file1.open("c:\\\\temp\\RoboMouseEvents.txt");
-
-    if (!file1.is_open())
-    {
-        throw new exception("Couldn't open file.");
-    }
-
-    for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
-        char str[80];
-
-        file1 << *i;
-        file1 << '\n';
-    }
-
-    file1.close();
-}
-
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE: Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-//
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
  
@@ -317,3 +276,37 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
+void SetHook()
+{
+    if (!(mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookCallback, NULL, 0)))
+        //if (!(mouseHook = SetWindowsHookEx(WH_MOUSE, MouseHookCallback, NULL, 0)))
+    {
+        cout << "Failed to install mouse hook!" << endl;
+    }
+}
+
+void ReleaseHook()
+{
+    UnhookWindowsHookEx(mouseHook);
+}
+
+void WriteEvents() 
+{
+
+    wofstream file1;
+    file1.open("c:\\\\temp\\RoboMouseEvents.txt");
+
+    if (!file1.is_open())
+    {
+        throw new exception("Couldn't open file.");
+    }
+
+    for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
+        char str[80];
+
+        file1 << *i;
+        file1 << '\n';
+    }
+
+    file1.close();
+}
