@@ -13,7 +13,8 @@
 #define IDC_ROBOMOUSE                   109
 #define IDR_MAINFRAME                   128
 #define ID_GO                           32771
-#define ID_FILE_REPLAY                  32772
+#define ID_STOP                         32772
+#define ID_FILE_REPLAY                  32773
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

@@ -12,6 +12,13 @@
 #include "resource.h"
 #include "RoboMouseEvent.h"
 #include "..\KLib\KLib.h"
+#include <chrono>
+#include <windows.h>
+#include <shlobj.h>
+#include <string_view>
+#include <stdio.h>
+#include <wchar.h>
+#include "FilePath.h"
 
 using namespace std;
 
@@ -24,8 +31,10 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HHOOK mouseHook;
 bool hookActive = false;
 std::vector<wstring> vecEvents;
-const wchar_t* fileName = L"c:\\\\temp\\RoboMouseEvents.txt";
-
+std::chrono::steady_clock::time_point _startTimeRecord;
+std::chrono::steady_clock::time_point _endTimeRecord;
+std::chrono::steady_clock::time_point _startTimePlayback;
+std::chrono::steady_clock::time_point _endTimePlayback;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -37,6 +46,8 @@ void                ReleaseHook();
 void                WriteEvents();
 void                ReplayFile();
 bool                DoesFileExist(LPWSTR lpszFilename);
+long counter = 0;
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -135,6 +146,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 {
+    
     if (nCode >= 0)
     {
         switch (wParam)
@@ -185,17 +197,22 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 
         case WM_MOUSEMOVE: 
         {
-            POINT cursorPoint;
-            GetCursorPos(&cursorPoint);
+            counter++;
+            
+            if (hookActive == true && counter % 5)
+            {
+                POINT cursorPoint;
+                GetCursorPos(&cursorPoint);
 
-            wstring Event = L"";
-            Event.assign(L"MouseMove");
-            Event.append(L",");
-            Event.append(to_wstring(cursorPoint.x));
-            Event.append(L",");
-            Event.append(to_wstring(cursorPoint.y));
+                wstring Event = L"";
+                Event.assign(L"MouseMove");
+                Event.append(L",");
+                Event.append(to_wstring(cursorPoint.x));
+                Event.append(L",");
+                Event.append(to_wstring(cursorPoint.y));
 
-            vecEvents.push_back(Event);
+                vecEvents.push_back(Event);
+            }
         }
 
         default:
@@ -227,17 +244,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case ID_GO:
                 if (hookActive == false) {
+                    long counter = 0;
                     SetHook();
                     hookActive = true;
+                    _startTimeRecord = std::chrono::high_resolution_clock::now();
                 }
                 else {
-                    ReleaseHook();
+                    _endTimeRecord = std::chrono::high_resolution_clock::now();
                     hookActive = false;
+                    ReleaseHook();
                     WriteEvents();
                 }
                 break;
-            case ID_FILE_REPLAY:
-                ReplayFile();
+            case ID_STOP:
+                ReleaseHook();
+                break;
+            case ID_FILE_REPLAY: {
+                    ReplayFile();
+
+                    //std::chrono::steady_clock::time_point _startTimeRecord;
+                    //std::chrono::steady_clock::time_point _endTimeRecord;
+
+                    // get the elapsed time of record
+                    auto diff1 = _endTimeRecord - _startTimeRecord;
+                    // convert from the clock rate to a millisecond clock
+                    auto recordMilliseconds = chrono::duration_cast<chrono::milliseconds>(diff1);
+                    // get the clock count (i.e. the number of milliseconds)
+                    auto recordMillisecondCount = recordMilliseconds.count();
+
+                    // get the elapsed time of playback
+                    auto diff2 = _endTimePlayback - _startTimePlayback;
+                    // convert from the clock rate to a millisecond clock
+                    auto playbackMilliseconds = chrono::duration_cast<chrono::milliseconds>(diff2);
+                    // get the clock count (i.e. the number of milliseconds)
+                    auto playbackMillisecondCount = playbackMilliseconds.count();
+                }
+
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -297,19 +339,22 @@ void ReleaseHook()
 
 void WriteEvents() 
 {
-    if (DoesFileExist((LPWSTR)fileName) == true)
-        DeleteFile(L"c:\\\\temp\\RoboMouseEvents.txt");
+    FilePath filePath;
+    std::wstring path = filePath.getPath(L"RoboMouseEvents.txt");
+
+    if(DoesFileExist((LPWSTR)path.c_str()))
+        DeleteFile(path.c_str());
 
     wofstream file1;
-    file1.open("c:\\\\temp\\RoboMouseEvents.txt");
+    file1.open(path.c_str());
 
     if (!file1.is_open())
     {
         throw new exception("Couldn't open file.");
     }
 
-    for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
-
+    for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) 
+    {
         file1 << *i;
         file1 << '\n';
     }
@@ -320,8 +365,10 @@ void WriteEvents()
 void ReplayFile()
 {
     wifstream file1;
+    FilePath filePath;
+    std::wstring path = filePath.getPath(L"RoboMouseEvents.txt");
     
-    file1.open("c:\\\\temp\\RoboMouseEvents.txt");
+    file1.open(path.c_str());
     if (!file1.is_open())
     {
         throw new exception("Couldn't open file.");
@@ -334,6 +381,8 @@ void ReplayFile()
     {
         vecEvents.push_back(line);
     }
+
+    _startTimePlayback = std::chrono::high_resolution_clock::now();
 
     for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
 
@@ -364,6 +413,8 @@ void ReplayFile()
             SendInput(1, Inputs, sizeof(INPUT));
         }
     }
+    _endTimePlayback = std::chrono::high_resolution_clock::now();
+
 
 
     file1.close();
@@ -381,3 +432,4 @@ bool DoesFileExist(LPWSTR lpszFilename)
     else
         return true;
 }
+
