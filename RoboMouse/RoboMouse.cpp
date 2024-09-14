@@ -243,23 +243,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DestroyWindow(hWnd);
                 break;
             case ID_GO:
-                if (hookActive == false) {
-                    long counter = 0;
-                    SetHook();
-                    hookActive = true;
-                    _startTimeRecord = std::chrono::high_resolution_clock::now();
-                }
-                else {
-                    _endTimeRecord = std::chrono::high_resolution_clock::now();
-                    hookActive = false;
-                    ReleaseHook();
-                    WriteEvents();
-                }
+                counter = 0;
+                SetHook();
+                hookActive = true;
+                _startTimeRecord = std::chrono::high_resolution_clock::now();
                 break;
             case ID_STOP:
+                _endTimeRecord = std::chrono::high_resolution_clock::now();
+                hookActive = false;
                 ReleaseHook();
+                WriteEvents();
                 break;
-            case ID_FILE_REPLAY: {
+            case ID_FILE_REPLAY: 
+                {
                     ReplayFile();
 
                     //std::chrono::steady_clock::time_point _startTimeRecord;
@@ -326,7 +322,6 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 void SetHook()
 {
     if (!(mouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookCallback, NULL, 0)))
-        //if (!(mouseHook = SetWindowsHookEx(WH_MOUSE, MouseHookCallback, NULL, 0)))
     {
         cout << "Failed to install mouse hook!" << endl;
     }
