@@ -1,6 +1,3 @@
-// RoboMouse.cpp : Defines the entry point for the application.
-//
-
 #include "framework.h"
 #include "RoboMouse.h"
 #include <iostream>
@@ -12,7 +9,7 @@
 #include "resource.h"
 #include "RoboMouseEvent.h"
 #include "..\KLib\KLib.h"
-#include <chrono>
+//#include <chrono>
 #include <windows.h>
 #include <shlobj.h>
 #include <string_view>
@@ -24,19 +21,13 @@ using namespace std;
 
 #define MAX_LOADSTRING 100
 
-// Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HHOOK mouseHook;
 bool hookActive = false;
 std::vector<wstring> vecEvents;
-std::chrono::steady_clock::time_point _startTimeRecord;
-std::chrono::steady_clock::time_point _endTimeRecord;
-std::chrono::steady_clock::time_point _startTimePlayback;
-std::chrono::steady_clock::time_point _endTimePlayback;
 
-// Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -57,14 +48,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: Place code here.
-
-    // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_ROBOMOUSE, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
-    // Perform application initialization:
     if (!InitInstance (hInstance, nCmdShow))
     {
         return FALSE;
@@ -74,7 +61,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     
     MSG msg;
 
-    // Main message loop:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -87,13 +73,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
-
-
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -115,19 +94,9 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // Store instance handle in our global variable
+   hInst = hInstance; 
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       300, 200, 300, 200, nullptr, nullptr, hInstance, nullptr);
@@ -174,8 +143,6 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
             //wstringstream windowInfo;
             //windowInfo << L"Window: " << clickedWindow << " " << wnd_title << L"\n";
             //OutputDebugString(windowInfo.str().c_str());
-
-            
         }
         break;
 
@@ -190,6 +157,10 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
             Event.append(to_wstring(cursorPoint.x));
             Event.append(L",");
             Event.append(to_wstring(cursorPoint.y));
+            
+            SYSTEMTIME st;
+            GetSystemTime(&st);
+            Event.append(L",");
 
             vecEvents.push_back(Event);
         }
@@ -233,7 +204,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
-            // Parse the menu selections:
             switch (wmId)
             {
             case IDM_ABOUT:
@@ -246,10 +216,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 counter = 0;
                 SetHook();
                 hookActive = true;
-                _startTimeRecord = std::chrono::high_resolution_clock::now();
                 break;
             case ID_STOP:
-                _endTimeRecord = std::chrono::high_resolution_clock::now();
                 hookActive = false;
                 ReleaseHook();
                 WriteEvents();
@@ -257,23 +225,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_FILE_REPLAY: 
                 {
                     ReplayFile();
-
-                    //std::chrono::steady_clock::time_point _startTimeRecord;
-                    //std::chrono::steady_clock::time_point _endTimeRecord;
-
-                    // get the elapsed time of record
-                    auto diff1 = _endTimeRecord - _startTimeRecord;
-                    // convert from the clock rate to a millisecond clock
-                    auto recordMilliseconds = chrono::duration_cast<chrono::milliseconds>(diff1);
-                    // get the clock count (i.e. the number of milliseconds)
-                    auto recordMillisecondCount = recordMilliseconds.count();
-
-                    // get the elapsed time of playback
-                    auto diff2 = _endTimePlayback - _startTimePlayback;
-                    // convert from the clock rate to a millisecond clock
-                    auto playbackMilliseconds = chrono::duration_cast<chrono::milliseconds>(diff2);
-                    // get the clock count (i.e. the number of milliseconds)
-                    auto playbackMillisecondCount = playbackMilliseconds.count();
                 }
 
                 break;
@@ -286,7 +237,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Add any drawing code that uses hdc here...
             EndPaint(hWnd, &ps);
         }
         break;
@@ -377,8 +327,6 @@ void ReplayFile()
         vecEvents.push_back(line);
     }
 
-    _startTimePlayback = std::chrono::high_resolution_clock::now();
-
     for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
 
         vector<wstring> splits = KLib::Split(*i);
@@ -408,9 +356,6 @@ void ReplayFile()
             SendInput(1, Inputs, sizeof(INPUT));
         }
     }
-    _endTimePlayback = std::chrono::high_resolution_clock::now();
-
-
 
     file1.close();
 }
@@ -418,9 +363,6 @@ void ReplayFile()
 bool DoesFileExist(LPWSTR lpszFilename)
 {
     DWORD attr = GetFileAttributes(lpszFilename);
-
-    //return (attr != INVALID_FILE_ATTRIBUTES)
-    //    && (GetLastError() == ERROR_FILE_NOT_FOUND));
 
     if (attr == INVALID_FILE_ATTRIBUTES)
         return false;
