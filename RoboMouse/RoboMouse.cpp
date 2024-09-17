@@ -9,13 +9,13 @@
 #include "resource.h"
 #include "RoboMouseEvent.h"
 #include "..\KLib\KLib.h"
-//#include <chrono>
 #include <windows.h>
 #include <shlobj.h>
 #include <string_view>
 #include <stdio.h>
 #include <wchar.h>
 #include "FilePath.h"
+#include <iostream>
 
 using namespace std;
 
@@ -158,10 +158,6 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
             Event.append(L",");
             Event.append(to_wstring(cursorPoint.y));
             
-            SYSTEMTIME st;
-            GetSystemTime(&st);
-            Event.append(L",");
-
             vecEvents.push_back(Event);
         }
         break;
@@ -181,6 +177,10 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
                 Event.append(to_wstring(cursorPoint.x));
                 Event.append(L",");
                 Event.append(to_wstring(cursorPoint.y));
+
+                //SYSTEMTIME st;
+                //GetSystemTime(&st);
+                //OutputDebugString(st.wMilliseconds);
 
                 vecEvents.push_back(Event);
             }

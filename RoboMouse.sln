@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RoboMouse", "RoboMouse\RoboMouse.vcxproj", "{8A4A1F43-6E1D-4C1C-B6D0-C478C55EE8CB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1D258904-9EE4-4FBF-9773-3CA143B35557} = {1D258904-9EE4-4FBF-9773-3CA143B35557}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KLib", "KLib\KLib.vcxproj", "{1D258904-9EE4-4FBF-9773-3CA143B35557}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTestsNative", "UnitTestsNative\UnitTestsNative.vcxproj", "{4A0CEE66-76D6-46C8-A8AE-516C1C2AC151}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,16 +26,24 @@ Global
 		{8A4A1F43-6E1D-4C1C-B6D0-C478C55EE8CB}.Debug|x86.Build.0 = Debug|Win32
 		{8A4A1F43-6E1D-4C1C-B6D0-C478C55EE8CB}.Release|x64.ActiveCfg = Release|x64
 		{8A4A1F43-6E1D-4C1C-B6D0-C478C55EE8CB}.Release|x64.Build.0 = Release|x64
-		{8A4A1F43-6E1D-4C1C-B6D0-C478C55EE8CB}.Release|x86.ActiveCfg = Release|Win32
-		{8A4A1F43-6E1D-4C1C-B6D0-C478C55EE8CB}.Release|x86.Build.0 = Release|Win32
+		{8A4A1F43-6E1D-4C1C-B6D0-C478C55EE8CB}.Release|x86.ActiveCfg = Debug|Win32
+		{8A4A1F43-6E1D-4C1C-B6D0-C478C55EE8CB}.Release|x86.Build.0 = Debug|Win32
 		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Debug|x64.ActiveCfg = Debug|x64
 		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Debug|x64.Build.0 = Debug|x64
 		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Debug|x86.ActiveCfg = Debug|Win32
 		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Debug|x86.Build.0 = Debug|Win32
 		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Release|x64.ActiveCfg = Release|x64
 		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Release|x64.Build.0 = Release|x64
-		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Release|x86.ActiveCfg = Release|Win32
-		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Release|x86.Build.0 = Release|Win32
+		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Release|x86.ActiveCfg = Debug|Win32
+		{1D258904-9EE4-4FBF-9773-3CA143B35557}.Release|x86.Build.0 = Debug|Win32
+		{4A0CEE66-76D6-46C8-A8AE-516C1C2AC151}.Debug|x64.ActiveCfg = Debug|x64
+		{4A0CEE66-76D6-46C8-A8AE-516C1C2AC151}.Debug|x64.Build.0 = Debug|x64
+		{4A0CEE66-76D6-46C8-A8AE-516C1C2AC151}.Debug|x86.ActiveCfg = Debug|Win32
+		{4A0CEE66-76D6-46C8-A8AE-516C1C2AC151}.Debug|x86.Build.0 = Debug|Win32
+		{4A0CEE66-76D6-46C8-A8AE-516C1C2AC151}.Release|x64.ActiveCfg = Release|x64
+		{4A0CEE66-76D6-46C8-A8AE-516C1C2AC151}.Release|x64.Build.0 = Release|x64
+		{4A0CEE66-76D6-46C8-A8AE-516C1C2AC151}.Release|x86.ActiveCfg = Debug|Win32
+		{4A0CEE66-76D6-46C8-A8AE-516C1C2AC151}.Release|x86.Build.0 = Debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
