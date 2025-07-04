@@ -15,9 +15,7 @@ namespace UnitTestsNative
 		
 		TEST_METHOD(GetNowtimeTest)
 		{
-			RoboTime roboTime;
-
-			auto time = roboTime.GetNowTime();
+			std::wstring time = RoboTime::GetNowTime();
 			Assert::IsNotNull(&time, L"time should not be null");
 		}
 	};

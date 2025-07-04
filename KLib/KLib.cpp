@@ -2,11 +2,11 @@
 #include "KLib.h"
 
 
-#ifdef KLIB_EXPORTS 
-#define KLIB_API  __declspec(dllexport)
-#else 
-#define KLIB_API  __declspec(dllimport)
-#endif 
+//#ifdef KLIB_EXPORTS 
+//#define KLIB_API  __declspec(dllexport)
+//#else 
+//#define KLIB_API  __declspec(dllimport)
+//#endif 
 
 
 using namespace std;
@@ -52,7 +52,7 @@ vector<string> KLib::Split(string Incoming)
 }
 
 
-std::string KLib::string_format(const std::string& fmt, ...)
+std::string KLib::string_format(const std::string fmt, ...)
 {
 	int size = 100;
 	std::string str;

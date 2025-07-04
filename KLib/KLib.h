@@ -3,12 +3,12 @@
 #include <vector>
 #include <string>
 
-
-#ifdef KLIB_EXPORTS 
-#define KLIB_API  __declspec(dllexport) 
-#else 
-#define KLIB_API  __declspec(dllimport) 
-#endif 
+#define KLIB_API
+//#ifdef KLIB_EXPORTS 
+//#define KLIB_API  __declspec(dllexport) 
+//#else 
+//#define KLIB_API  __declspec(dllimport) 
+//#endif 
 
 using namespace std;
 
@@ -36,5 +36,5 @@ public:
     KLIB_API static wstring GetLastErrorMessage(DWORD LastError);
     KLIB_API static vector<wstring> Split(wstring Incoming);
     KLIB_API static vector<string> Split(string Incoming);
-    KLIB_API static std::string string_format(const std::string& fmt, ...);
+    KLIB_API static std::string string_format(const std::string fmt, ...);
 };

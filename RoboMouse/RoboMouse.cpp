@@ -16,6 +16,7 @@
 #include <wchar.h>
 #include "FilePath.h"
 #include <iostream>
+#include "RoboTime.h"
 
 using namespace std;
 
@@ -177,10 +178,10 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
                 Event.append(to_wstring(cursorPoint.x));
                 Event.append(L",");
                 Event.append(to_wstring(cursorPoint.y));
+                Event.append(L",");
+                Event.append(RoboTime::GetNowTime());
 
-                //SYSTEMTIME st;
-                //GetSystemTime(&st);
-                //OutputDebugString(st.wMilliseconds);
+
 
                 vecEvents.push_back(Event);
             }

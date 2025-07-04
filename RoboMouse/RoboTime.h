@@ -1,15 +1,16 @@
 #pragma once
 #include <chrono>
+#include <string>
 
-#ifdef COMPILING_DLL
-#define DLLEXPORT __declspec(dllexport)
-#else
-#define DLLEXPORT __declspec(dllimport)
-#endif
+//#ifdef COMPILING_DLL
+//#define DLLEXPORT __declspec(dllexport)
+//#else
+//#define DLLEXPORT __declspec(dllimport)
+//#endif
 
-class DLLEXPORT RoboTime
+class RoboTime
 {
 public:
-    std::chrono::time_point<std::chrono::high_resolution_clock> GetNowTime();
+    static std::wstring GetNowTime();
 };
 

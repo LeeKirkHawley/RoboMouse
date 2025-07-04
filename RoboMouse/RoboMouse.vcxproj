@@ -166,6 +166,11 @@
     <Image Include="RoboMouse.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KLib\KLib.vcxproj">
+      <Project>{1d258904-9ee4-4fbf-9773-3ca143b35557}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
