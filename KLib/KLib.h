@@ -36,5 +36,4 @@ public:
     KLIB_API static wstring GetLastErrorMessage(DWORD LastError);
     KLIB_API static vector<wstring> Split(wstring Incoming);
     KLIB_API static vector<string> Split(string Incoming);
-    KLIB_API static std::string string_format(const std::string fmt, ...);
 };

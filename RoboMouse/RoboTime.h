@@ -2,15 +2,12 @@
 #include <chrono>
 #include <string>
 
-//#ifdef COMPILING_DLL
-//#define DLLEXPORT __declspec(dllexport)
-//#else
-//#define DLLEXPORT __declspec(dllimport)
-//#endif
-
 class RoboTime
 {
 public:
     static std::wstring GetNowTime();
+    static std::chrono::milliseconds GetNowTimestamp();
+    static std::wstring milliseconds_to_wstring(std::chrono::milliseconds ms);
+    static std::chrono::milliseconds wstring_to_milliseconds(const std::wstring& wstr);
 };
 

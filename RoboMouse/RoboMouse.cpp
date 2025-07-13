@@ -1,22 +1,24 @@
-#include "framework.h"
-#include "RoboMouse.h"
 #include <iostream>
 #include <vector>
 #include <windowsx.h>
 #include <sstream>
 #include <fstream>
 #include <string>
-#include "resource.h"
-#include "RoboMouseEvent.h"
-#include "..\KLib\KLib.h"
 #include <windows.h>
 #include <shlobj.h>
 #include <string_view>
 #include <stdio.h>
 #include <wchar.h>
+#include <thread>
+#include <iomanip>
+#include <ctime>
+#include "framework.h"
+#include "RoboMouse.h"
 #include "FilePath.h"
-#include <iostream>
 #include "RoboTime.h"
+#include "resource.h"
+#include "RoboMouseEvent.h"
+#include "..\KLib\KLib.h"
 
 using namespace std;
 
@@ -39,6 +41,7 @@ void                WriteEvents();
 void                ReplayFile();
 bool                DoesFileExist(LPWSTR lpszFilename);
 long counter = 0;
+std::chrono::steady_clock::time_point previousEventTime{};
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -113,10 +116,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-
 LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 {
-    
     if (nCode >= 0)
     {
         switch (wParam)
@@ -127,14 +128,16 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
                 POINT cursorPoint;
                 GetCursorPos(&cursorPoint);
 
-                wstring Event = L"";
-                Event.assign(L"LeftButtonDown");
-                Event.append(L",");
-                Event.append(to_wstring(cursorPoint.x));
-                Event.append(L",");
-                Event.append(to_wstring(cursorPoint.y));
+                wstring event = L"";
+                event.assign(L"LeftButtonDown");
+                event.append(L",");
+                event.append(to_wstring(cursorPoint.x));
+                event.append(L",");
+                event.append(to_wstring(cursorPoint.y));
+                event.append(L",");
+                event.append(RoboTime::milliseconds_to_wstring(RoboTime::GetNowTimestamp()));
 
-                vecEvents.push_back(Event);
+                vecEvents.push_back(event);
             }
 
             // ACTIVE WINDOW
@@ -152,14 +155,16 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
             POINT cursorPoint;
             GetCursorPos(&cursorPoint);
 
-            wstring Event = L"";
-            Event.assign(L"LeftButtonUp");
-            Event.append(L",");
-            Event.append(to_wstring(cursorPoint.x));
-            Event.append(L",");
-            Event.append(to_wstring(cursorPoint.y));
-            
-            vecEvents.push_back(Event);
+            wstring event = L"";
+            event.assign(L"LeftButtonUp");
+            event.append(L",");
+            event.append(to_wstring(cursorPoint.x));
+            event.append(L",");
+            event.append(to_wstring(cursorPoint.y));
+            event.append(L",");
+            event.append(RoboTime::milliseconds_to_wstring(RoboTime::GetNowTimestamp()));
+
+            vecEvents.push_back(event);
         }
         break;
 
@@ -172,18 +177,16 @@ LRESULT __stdcall MouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
                 POINT cursorPoint;
                 GetCursorPos(&cursorPoint);
 
-                wstring Event = L"";
-                Event.assign(L"MouseMove");
-                Event.append(L",");
-                Event.append(to_wstring(cursorPoint.x));
-                Event.append(L",");
-                Event.append(to_wstring(cursorPoint.y));
-                Event.append(L",");
-                Event.append(RoboTime::GetNowTime());
+                wstring event = L"";
+                event.assign(L"MouseMove");
+                event.append(L",");
+                event.append(to_wstring(cursorPoint.x));
+                event.append(L",");
+                event.append(to_wstring(cursorPoint.y));
+                event.append(L",");
+                event.append(RoboTime::milliseconds_to_wstring(RoboTime::GetNowTimestamp()));
 
-
-
-                vecEvents.push_back(Event);
+                vecEvents.push_back(event);
             }
         }
 
@@ -328,9 +331,25 @@ void ReplayFile()
         vecEvents.push_back(line);
     }
 
-    for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
 
+    std::chrono::milliseconds lastMs = {};
+
+    for (vector<wstring>::const_iterator i = vecEvents.begin(); i != vecEvents.end(); ++i) {
         vector<wstring> splits = KLib::Split(*i);
+        std::wstring time = splits[3];
+
+        std::chrono::milliseconds ms = RoboTime::wstring_to_milliseconds(time);
+
+        if (lastMs.count() != 0) 
+        {
+            std::chrono::milliseconds diff = ms - lastMs;
+            if (diff.count() > 0) 
+            {
+                Sleep(diff.count());
+            }
+        }
+
+        lastMs = ms;
 
         if (splits[0] == L"MouseMove") {
             SetCursorPos(stoi(splits[1]), stoi(splits[2]));
